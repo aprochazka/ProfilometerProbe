@@ -6,7 +6,7 @@
 - Build using Makefile inside root folder
 - Flash onto hardware using flash option for make command `$ make flash`
 
-#### Supported HW:
+### Supported HW:
 - Nucleo L432KC 
 - Arducam 5MP Plus
 
