@@ -123,17 +123,17 @@ int main(void)
     Cam_Start_Burst_Read(&hspi1);
 
     HAL_SPI_Receive_DMA(&hspi1, image_data, image_size);
+    Debug_LED_On();
 
     while (SPI_Rx_Done_Flag == 0)
     {
       // Wait for SPI transfer to finish
     }
-
+    Debug_LED_Off();
     CS_Off();
 
     SPI_Rx_Done_Flag = 0;
 
-    Debug_LED_On();
     HAL_UART_Transmit(&huart2, image_data, image_size, HAL_MAX_DELAY);
     Debug_LED_Off();
     free(image_data);
