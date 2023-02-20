@@ -34,6 +34,12 @@ You can connect optional Debug LED to A1 pin in Nucleo board.
 
 - UART Baud Rate is set to 115200 Bits/s
 
+### Test Script Usage
+
+- Build test app using provided Makefile and then run the executable
+
+- App will then start saving files received by uart to filesystem
+
 ### In progress
 
 - Implementing tinyUSB UVC to send JPEGS instead of UART
