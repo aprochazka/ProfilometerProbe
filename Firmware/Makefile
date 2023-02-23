@@ -65,8 +65,7 @@ Core/Cam/Cam.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pcd.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pcd_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usb.c \
-
-#Core/src/tusb.c \
+Core/src/tusb.c \
 Core/src/common/tusb_fifo.c \
 Core/src/device/usbd.c \
 Core/src/device/usbd_control.c \
