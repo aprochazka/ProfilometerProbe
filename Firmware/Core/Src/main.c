@@ -86,7 +86,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  tusb_init();
+  // tusb_init();
 
   /* USER CODE END Init */
 
@@ -119,7 +119,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    tud_task();
+    // tud_task();
     /*
     Cam_Capture(&hspi1);
 
