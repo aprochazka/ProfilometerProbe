@@ -68,6 +68,37 @@ static void MX_USB_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void cdc_task(void)
+{
+  // connected() check for DTR bit
+  // Most but not all terminal client set this when making connection
+  // if ( tud_cdc_connected() )
+  {
+
+    // connected and there are data available
+    if (tud_cdc_available())
+    {
+      Debug_LED_On();
+
+      // read data
+      char buf[64];
+      uint32_t count = tud_cdc_read(buf, sizeof(buf));
+      (void)count;
+
+      //char buf_2[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+      //uint32_t count_2 = 10;
+      // Echo back
+      // Note: Skip echo by commenting out write() and write_flush()
+      // for throughput test e.g
+      //    $ dd if=/dev/zero of=/dev/ttyACM0 count=10000
+      tud_cdc_write(buf, count);
+      //tud_cdc_n_write(10, buf_2, count_2);
+      tud_cdc_write_flush();
+    }
+  }
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -77,7 +108,6 @@ static void MX_USB_PCD_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -86,7 +116,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  // tusb_init();
 
   /* USER CODE END Init */
 
@@ -94,6 +123,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  HAL_PWREx_EnableVddUSB();
 
   /* USER CODE END SysInit */
 
@@ -105,21 +135,24 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+  tud_init(BOARD_DEVICE_RHPORT_NUM);
 
-  //  HAL_Delay(10);
-  // SPI_Init(&hspi1);
+  HAL_Delay(10);
+  SPI_Init(&hspi1);
 
   // Wait for power stabilization
-  // HAL_Delay(1000);
+  HAL_Delay(1000);
 
-  // Cam_Init(&hi2c1, &hspi1);
+  //Cam_Init(&hi2c1, &hspi1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // tud_task();
+    tud_task();
+    cdc_task();
+
     /*
     Cam_Capture(&hspi1);
 

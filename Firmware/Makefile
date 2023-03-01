@@ -34,7 +34,8 @@ $(BUILD_DIR)/Makefile: CMakeLists.txt
 		-DDUMP_ASM=OFF
 
 # Formats all user modified source files (add ones that are missing)
-SRCS := $(shell find Project -name '*.[ch]' -or -name '*.[ch]pp') Core/Src/main.c
+# SRCS := $(shell find Project -name '*.[ch]' -or -name '*.[ch]pp') Core/Src/main.c
+SRCS := $(shell find Core -name '*.[ch]' -or -name '*.[ch]pp') Core/Src/main.c
 format: $(addsuffix .format,$(SRCS))
 %.format: %
 	clang-format -i $<
@@ -131,3 +132,6 @@ clean-image:
 	$(CONTAINER_TOOL) image rmi -f $(IMAGE_NAME) 2> /dev/null > /dev/null || true
 
 clean-all: clean clean-image
+
+flash:
+	openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "program build/Probe.bin verify reset exit 0x08000000"
