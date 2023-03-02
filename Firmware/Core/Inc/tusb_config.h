@@ -37,7 +37,7 @@ extern "C"
 
 // RHPort number used for device can be defined by board.mk, default to port 0
 #ifndef BOARD_TUD_RHPORT
-#define BOARD_TUD_RHPORT 0
+#define BOARD_TUD_RHPORT 1
 #endif
 
 // RHPort max operational speed can defined by board.mk
@@ -51,9 +51,9 @@ extern "C"
 
 #define CFG_TUSB_MCU OPT_MCU_STM32L4
 #define CFG_TUSB_OS OPT_OS_NONE
-#define BOARD_DEVICE_RHPORT_SPEED OPT_MODE_HIGH_SPEED
+#define BOARD_DEVICE_RHPORT_SPEED OPT_MODE_LOW_SPEED
 #define BOARD_DEVICE_RHPORT_NUM 1
-#define CFG_TUSB_RHPORT_MODE (OPT_MODE_DEVICE | OPT_MODE_HIGH_SPEED)
+#define CFG_TUSB_RHPORT_MODE (OPT_MODE_DEVICE | OPT_MODE_LOW_SPEED)
 
 // defined by compiler flags for flexibility
 #ifndef CFG_TUSB_MCU
@@ -99,7 +99,7 @@ extern "C"
 
 //------------- CLASS -------------//
 #define CFG_TUD_CDC 1
-#define CFG_TUD_MSC 0
+#define CFG_TUD_MSC 1
 #define CFG_TUD_HID 0
 #define CFG_TUD_MIDI 0
 #define CFG_TUD_VENDOR 0

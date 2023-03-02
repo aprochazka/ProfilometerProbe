@@ -55,11 +55,11 @@ ${CMAKE_CURRENT_SOURCE_DIR}/Core/Cam
 )
 
 set (TINY_USB_INCLUDE_DIRECTORIES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/src/class/cdc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/src/class/msc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/src/device
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/hw
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/src/class/cdc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/src/class/msc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/src/device
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/hw
     )
 
 file(GLOB_RECURSE STM32CUBEMX_SOURCES CONFIGURE_DEPENDS
@@ -79,7 +79,7 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
     ${PROJECT_DIR}/*.cpp
     ${PROJECT_DIR}/*.c)
 
-set(TINY_USB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Core/tinyusb/src)
+set(TINY_USB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tinyusb/src)
 file(GLOB_RECURSE TINY_USB_SOURCES CONFIGURE_DEPENDS
     ${TINY_USB_DIR}/*.cpp
     ${TINY_USB_DIR}/*.c
