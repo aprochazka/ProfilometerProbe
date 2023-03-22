@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "images.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -69,44 +69,64 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-enum
+static unsigned frame_num = 0;
+static unsigned tx_busy = 0;
+static unsigned interval_ms = 1000 / FRAME_RATE;
+
+static uint8_t frame_buffer[FRAME_WIDTH * FRAME_HEIGHT * 16 / 8];
+static void fill_color_bar(uint8_t *buffer, unsigned start_position)
 {
-  BLINK_NOT_MOUNTED = 250,
-  BLINK_MOUNTED = 1000,
-  BLINK_SUSPENDED = 2500,
+  /* EBU color bars
+   * See also https://stackoverflow.com/questions/6939422 */
+  static uint8_t const bar_color[8][4] = {
+    /*  Y,   U,   Y,   V */
+    { 235, 128, 235, 128}, /* 100% White */
+    { 219,  16, 219, 138}, /* Yellow */
+    { 188, 154, 188,  16}, /* Cyan */
+    { 173,  42, 173,  26}, /* Green */
+    {  78, 214,  78, 230}, /* Magenta */
+    {  63, 102,  63, 240}, /* Red */
+    {  32, 240,  32, 118}, /* Blue */
+    {  16, 128,  16, 128}, /* Black */
+  };
+  uint8_t *p;
+
+  /* Generate the 1st line */
+  uint8_t *end = &buffer[FRAME_WIDTH * 2];
+  unsigned idx = (FRAME_WIDTH / 2 - 1) - (start_position % (FRAME_WIDTH / 2));
+  p = &buffer[idx * 4];
+  for (unsigned i = 0; i < 8; ++i) {
+    for (int j = 0; j < FRAME_WIDTH / (2 * 8); ++j) {
+      memcpy(p, &bar_color[i], 4);
+      p += 4;
+      if (end <= p) {
+        p = buffer;
+      }
+    }
+  }
+  /* Duplicate the 1st line to the others */
+  p = &buffer[FRAME_WIDTH * 2];
+  for (unsigned i = 1; i < FRAME_HEIGHT; ++i) {
+    memcpy(p, buffer, FRAME_WIDTH * 2);
+    p += FRAME_WIDTH * 2;
+  }
+}
+
+static struct {
+  uint32_t       size;
+  uint8_t const *buffer;
+} const frames[] = {
+  {color_bar_0_jpg_len, color_bar_0_jpg},
+  {color_bar_1_jpg_len, color_bar_1_jpg},
+  {color_bar_2_jpg_len, color_bar_2_jpg},
+  {color_bar_3_jpg_len, color_bar_3_jpg},
+  {color_bar_4_jpg_len, color_bar_4_jpg},
+  {color_bar_5_jpg_len, color_bar_5_jpg},
+  {color_bar_6_jpg_len, color_bar_6_jpg},
+  {color_bar_7_jpg_len, color_bar_7_jpg},
 };
 
-static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
-
-
-// Invoked when device is mounted
-void tud_mount_cb(void)
-{
-  blink_interval_ms = BLINK_MOUNTED;
-}
-
-// Invoked when device is unmounted
-void tud_umount_cb(void)
-{
-  blink_interval_ms = BLINK_NOT_MOUNTED;
-}
-
-// Invoked when usb bus is suspended
-// remote_wakeup_en : if host allow us  to perform remote wakeup
-// Within 7ms, device must draw an average of current less than 2.5 mA from bus
-void tud_suspend_cb(bool remote_wakeup_en)
-{
-  (void)remote_wakeup_en;
-  blink_interval_ms = BLINK_SUSPENDED;
-}
-
-// Invoked when usb bus is resumed
-void tud_resume_cb(void)
-{
-  blink_interval_ms = BLINK_MOUNTED;
-}
-
-
+/*
 void cdc_task(void)
 {
   // connected() check for DTR bit
@@ -117,7 +137,6 @@ void cdc_task(void)
     // connected and there are data available
     if (tud_cdc_available())
     {
-      Debug_LED_On();
 
       // read data
       char buf[64];
@@ -136,31 +155,38 @@ void cdc_task(void)
     }
   }
 }
+*/
 
-// Invoked when cdc when line state changed e.g connected/disconnected
-void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
+void video_task(void)
 {
-  (void)itf;
-  (void)rts;
+  static unsigned start_ms = 0;
+  static unsigned already_sent = 0;
 
-  // TODO set some indicator
-  if (dtr)
-  {
-    // Terminal connected
+  if (!tud_video_n_streaming(0, 0)) {
+    already_sent  = 0;
+    frame_num     = 0;
+    //return;
   }
-  else
-  {
-    // Terminal disconnected
+
+  if (!already_sent) {
+    already_sent = 1;
+    start_ms = HAL_GetTick();
+
+    //tud_video_n_frame_xfer(0, 0, (void*)(uintptr_t)frames[frame_num % 8].buffer, frames[frame_num % 8].size);
+    fill_color_bar(frame_buffer, frame_num);
+    tud_video_n_frame_xfer(0, 0, (void*)frame_buffer, FRAME_WIDTH * FRAME_HEIGHT * 16/8);
   }
+
+  //tud_video_n_frame_xfer(0, 0, (void*)(uintptr_t)frames[frame_num % 8].buffer, frames[frame_num % 8].size);
+  return;
+  unsigned cur = HAL_GetTick();
+  if (cur - start_ms < interval_ms) return; // not enough time
+  if (tx_busy) return;
+  start_ms += interval_ms;
+
+
+  tud_video_n_frame_xfer(0, 0, (void*)(uintptr_t)frames[frame_num % 8].buffer, frames[frame_num % 8].size);
 }
-
-
-// Invoked when CDC interface received data from host
-void tud_cdc_rx_cb(uint8_t itf)
-{
-  (void)itf;
-}
-
 
 /* USER CODE END 0 */
 
@@ -187,6 +213,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -197,15 +224,17 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+
   HAL_PWREx_EnableVddUSB();
-
+  HAL_Delay(1);
   tud_init(BOARD_DEVICE_RHPORT_NUM);
+  
 
-  HAL_Delay(10);
-  SPI_Init(&hspi1);
+  //HAL_Delay(10);
+  //SPI_Init(&hspi1);
 
   // Wait for power stabilization
-  HAL_Delay(1000);
+  //HAL_Delay(1000);
 
   //Cam_Init(&hi2c1, &hspi1);
   /* USER CODE END 2 */
@@ -215,7 +244,10 @@ int main(void)
   while (1)
   {
     tud_task();
-    cdc_task();
+    //tud_cdc_write("1\r", 3);
+    //tud_cdc_write_flush();
+    video_task();
+    HAL_Delay(1);
 
     /*
     Cam_Capture(&hspi1);

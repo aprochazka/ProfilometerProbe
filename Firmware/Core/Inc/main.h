@@ -38,6 +38,7 @@ extern "C"
 #include "stdbool.h"
 #include "tusb.h"
 #include "Cam.h"
+#include "usb_descriptors.h"
 
     // #include "portable/st/synopsys/dcd_synopsys.c"
     // #include "portable/st/synopsys/synopsys_common.h"

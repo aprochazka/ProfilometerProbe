@@ -25,6 +25,8 @@
 
 #include "bsp/board.h"
 #include "tusb.h"
+#include "Cam.h"
+
 
 #if CFG_TUD_MSC
 
