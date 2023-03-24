@@ -26,6 +26,9 @@ Before running code, connect camera module to microcontroler through pins descri
 
 You can connect optional Debug LED to A1 pin in Nucleo board.
 
+#### Probe design block Scheme
+![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/deviceScheme.png?raw=true)
+
 ### Usage
 
 - After turning on device, it initializes camera module and starts to capture JPEG images and continuously sends them through UART. 
@@ -43,3 +46,4 @@ You can connect optional Debug LED to A1 pin in Nucleo board.
 ### In progress
 
 - Implementing tinyUSB UVC to send JPEGS instead of UART
+
