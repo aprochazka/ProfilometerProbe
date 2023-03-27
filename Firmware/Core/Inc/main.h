@@ -28,10 +28,12 @@ extern "C"
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#define USE_HAL_DRIVER
 #include "stm32l4xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#define CFG_EXAMPLE_VIDEO_READONLY
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

@@ -27,6 +27,8 @@
 #ifndef _USB_DESCRIPTORS_H_
 #define _USB_DESCRIPTORS_H_
 
+#define CFG_EXAMPLE_VIDEO_READONLY
+
 /* Time stamp base clock. It is a deprecated parameter. */
 #define UVC_CLOCK_FREQUENCY    27000000
 /* video capture path */
@@ -35,7 +37,7 @@
 
 #define FRAME_WIDTH   128
 #define FRAME_HEIGHT  96
-#define FRAME_RATE    10
+#define FRAME_RATE    8
 
 enum {
   ITF_NUM_VIDEO_CONTROL,
