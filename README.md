@@ -3,7 +3,7 @@
 
 ### Build
 
-- Build using Makefile inside root folder
+- Build using Makefile inside Firmware folder
 - Flash onto hardware using flash option for make command `$ make flash`
 
 ### Supported HW:
@@ -29,15 +29,21 @@ You can connect optional Debug LED to A1 pin in Nucleo board.
 #### Probe design block Scheme
 ![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/deviceScheme.png?raw=true)
 
-### Usage
+### Current State
 
-- After turning on device, it initializes camera module and starts to capture JPEG images and continuously sends them through UART. 
+- Sends test JPEG image sequence through USB CDC
 
-- Currently only supports JPEG images in resolution 320*240
+### Test Current State
 
-- UART Baud Rate is set to 115200 Bits/s
+- Tested on: Arch Linux
 
-### Test Script Usage
+- Inside Receiver folder build using Makefile  
+
+- Code counts with CDC device on /dev/ttyACM2 (can be changed in code)
+
+- Run with sudo permission, so that serial port is openable
+
+### Test Script Usage - outdated
 
 - Build test app using provided Makefile and then run the executable
 
@@ -45,5 +51,4 @@ You can connect optional Debug LED to A1 pin in Nucleo board.
 
 ### In progress
 
-- Implementing tinyUSB UVC to send JPEGS instead of UART
 
