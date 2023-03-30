@@ -96,19 +96,11 @@
 #endif
 
 //------------- CLASS -------------//
-#define CFG_TUD_CDC               0
-// The number of video control interfaces
-#define CFG_TUD_VIDEO             1
+#define CFG_TUD_CDC               1
 #define CFG_TUD_MSC               0
 #define CFG_TUD_HID               0
 #define CFG_TUD_MIDI              0
 #define CFG_TUD_VENDOR            0
-
-// The number of video streaming interfaces
-#define CFG_TUD_VIDEO_STREAMING  1
-
-// video streaming endpoint size
-#define CFG_TUD_VIDEO_STREAMING_EP_BUFSIZE  256
 
 // CDC FIFO size of TX and RX
 #define CFG_TUD_CDC_RX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
