@@ -68,6 +68,7 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/*
 static unsigned frame_num = 0;
 static unsigned tx_busy = 0;
 static unsigned interval_ms = 1000 / FRAME_RATE;
@@ -86,7 +87,7 @@ static struct {
   {color_bar_7_jpg_len, color_bar_7_jpg},
 };
 
-
+*/
 /*
 void cdc_task(void)
 {
@@ -159,6 +160,7 @@ uint8_t sendT[600] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
 };
+/*
 
 int currentIdx = 0;
 int currentImg = 0;
@@ -203,7 +205,7 @@ int send_CDC_Bulk(){
   currentIdx = currentIdx + 10;
   return 1;
 }
-
+*/
 
 /* USER CODE END 0 */
 
@@ -247,14 +249,35 @@ int main(void)
   tud_init(BOARD_DEVICE_RHPORT_NUM);
   
 
-  //HAL_Delay(10);
-  //SPI_Init(&hspi1);
+  HAL_Delay(10);
+  SPI_Init(&hspi1);
 
   // Wait for power stabilization
   //HAL_Delay(1000);
 
-  //Cam_Init(&hi2c1, &hspi1);
+  Cam_Init(&hi2c1, &hspi1);
 
+  int currentSendingIndex = 0;
+
+
+  Cam_Capture(&hspi1);
+
+  uint16_t image_size = Cam_FIFO_length(&hspi1);
+
+  //uint8_t *image_data = malloc((image_size + (image_size%10)) * sizeof(uint8_t));
+  uint8_t image_data[10000];
+  memset(image_data, 0x00, image_size + (image_size%10));
+
+  Cam_Start_Burst_Read(&hspi1);
+
+  HAL_SPI_Receive_DMA(&hspi1, image_data, image_size);
+
+  while (SPI_Rx_Done_Flag == 0)
+  {
+    // Wait for SPI transfer to finish
+  }
+  CS_Off();
+  SPI_Rx_Done_Flag = 0;
 
   /* USER CODE END 2 */
 
@@ -262,42 +285,44 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    
     tud_task();
-    //tud_cdc_write("1\r", 3);
 
-    //tud_cdc_write_flush();
-    //video_task();
-    //HAL_Delay(10);
-    send_CDC_Bulk();
-    HAL_Delay(5);
+    if(currentSendingIndex >= 590){
+      currentSendingIndex = 0;
 
+      //free(image_data);
+      Cam_Capture(&hspi1);
 
-    /*
-    Cam_Capture(&hspi1);
+      image_size = Cam_FIFO_length(&hspi1);
 
-    uint16_t image_size = Cam_FIFO_length(&hspi1);
+      //image_data = malloc((image_size + (image_size%10)) * sizeof(uint8_t));
+      //memset(image_data, 0x00, image_size + (image_size%10));
 
-    uint8_t *image_data = malloc(image_size * sizeof(uint8_t));
-    memset(image_data, 0x00, image_size);
+      Cam_Start_Burst_Read(&hspi1);
 
-    Cam_Start_Burst_Read(&hspi1);
+      HAL_SPI_Receive_DMA(&hspi1, &(image_data[0]), image_size);
+      Debug_LED_On();
 
-    HAL_SPI_Receive_DMA(&hspi1, image_data, image_size);
-    Debug_LED_On();
-
-    while (SPI_Rx_Done_Flag == 0)
-    {
-      // Wait for SPI transfer to finish
+      while (SPI_Rx_Done_Flag == 0)
+      {
+        // Wait for SPI transfer to finish
+      }
+      CS_Off();
+      SPI_Rx_Done_Flag = 0;
+      if(image_size < 1){
+              currentSendingIndex = 10000;
+      } 
+    
     }
-    Debug_LED_Off();
-    CS_Off();
+    else {
+      LED_On();
+      tud_cdc_write(&sendT[currentSendingIndex], 10);
+      tud_cdc_write_flush();
+      currentSendingIndex = currentSendingIndex + 10;
+      HAL_Delay(5);
+    }
 
-    SPI_Rx_Done_Flag = 0;
-
-    HAL_UART_Transmit(&huart2, image_data, image_size, HAL_MAX_DELAY);
-    Debug_LED_Off();
-    free(image_data);
-    */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

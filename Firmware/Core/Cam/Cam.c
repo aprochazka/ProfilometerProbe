@@ -207,11 +207,11 @@ void Cam_Start_Burst_Read(SPI_HandleTypeDef *hspi)
 
 void Cam_Capture(SPI_HandleTypeDef *hspi)
 {
-    LED_On();
+    //LED_On();
 
     Cam_Start_Capture(hspi);
 
     Cam_Wait_Capture_Done(hspi);
 
-    LED_Off();
+    //LED_Off();
 }

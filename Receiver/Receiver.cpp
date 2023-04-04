@@ -11,7 +11,7 @@ void Receiver::printHex(unsigned char value) {
 void Receiver::openStream(){
     while(1){
     // Open the CDC device file for reading
-        cdcFile = open("/dev/ttyACM2", O_RDWR | O_NOCTTY);
+        cdcFile = open("/dev/ttyACM1", O_RDWR | O_NOCTTY);
         if (cdcFile == -1) {
             std::cerr << "Failed to open CDC device file" << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));

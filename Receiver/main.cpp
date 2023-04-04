@@ -9,13 +9,22 @@
 
         int cdcFile;
         struct termios tty;
-void readLoop(){
-    openStream(&cdcFile);
-    initSerial(&tty, &cdcFile);
+
+void readLoop(Receiver ** receiverPtr){
+    (*receiverPtr)->openStream();
+    (*receiverPtr)->initSerial();
 
     while (true) {
-        readCdcData(&cdcFile);
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        unsigned char character[10];
+        (*receiverPtr)->readCdcData(&character);
+        if((*receiverPtr)->findStart(&character) != -1)
+        {std::cout << "start" << std::endl;}
+        else if((*receiverPtr)->findEnd(&character) != -1)
+        {std::cout << "stop" << std::endl;}
+        else{
+          std::cout << "-";
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
     close(cdcFile);
@@ -36,12 +45,13 @@ void receiverLoop(Receiver ** receiverPtr){
 
 int main()
 {
-
   Displayer dis;
+  Receiver *rec = new Receiver(&dis);
+
+  /*
   dis.createWindow();
   dis.renderWindow();
 
-  Receiver *rec = new Receiver(&dis);
   rec->openStream();
   rec->initSerial();
   rec->fillBuffer();
@@ -52,8 +62,8 @@ int main()
   dis.windowLoop();
 
   t1.join();
+  */
 
-
-  //readLoop();
+  readLoop(&rec);
   return 0;
 }

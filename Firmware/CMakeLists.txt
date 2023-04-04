@@ -135,6 +135,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -Wl,--start-group
     -lc
     -lm
+    -lnosys
     -lstdc++
     -Wl,--end-group
     -Wl,--print-memory-usage)
