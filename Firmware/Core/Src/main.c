@@ -21,7 +21,7 @@
 #include "images.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "tusb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,15 +47,22 @@ DMA_HandleTypeDef hdma_spi1_tx;
 
 UART_HandleTypeDef huart2;
 
+
+
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+//DAC_HandleTypeDef hdac1;
+
+//TIM_HandleTypeDef htim15;
+
 int SPI_Rx_Done_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
@@ -63,7 +70,8 @@ static void MX_I2C1_Init(void);
 static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
-
+//static void MX_DAC1_Init(void);
+//static void MX_TIM15_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -216,6 +224,7 @@ int send_CDC_Bulk(){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  LED_On();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -243,11 +252,11 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
-
+  //MX_DAC1_Init();
+  //MX_TIM15_Init();
   HAL_PWREx_EnableVddUSB();
   HAL_Delay(1);
   tud_init(BOARD_DEVICE_RHPORT_NUM);
-  
 
   HAL_Delay(10);
   SPI_Init(&hspi1);
@@ -264,21 +273,22 @@ int main(void)
 
   uint16_t image_size = Cam_FIFO_length(&hspi1);
 
-  //uint8_t *image_data = malloc((image_size + (image_size%10)) * sizeof(uint8_t));
   uint8_t image_data[10000];
-  memset(image_data, 0x00, image_size + (image_size%10));
+  //memset(image_data, 0x00, image_size);
 
   Cam_Start_Burst_Read(&hspi1);
 
   HAL_SPI_Receive_DMA(&hspi1, image_data, image_size);
+  //HAL_SPI_Receive(&hspi1, image_data, image_size, HAL_MAX_DELAY);
 
   while (SPI_Rx_Done_Flag == 0)
   {
     // Wait for SPI transfer to finish
   }
+  LED_On();
+
   CS_Off();
   SPI_Rx_Done_Flag = 0;
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -288,11 +298,12 @@ int main(void)
     
     tud_task();
 
-    if(currentSendingIndex >= 590){
+    if(currentSendingIndex >= 9989){
+    //if(false){
       currentSendingIndex = 0;
-
       //free(image_data);
       Cam_Capture(&hspi1);
+
 
       image_size = Cam_FIFO_length(&hspi1);
 
@@ -301,12 +312,13 @@ int main(void)
 
       Cam_Start_Burst_Read(&hspi1);
 
-      HAL_SPI_Receive_DMA(&hspi1, &(image_data[0]), image_size);
-      Debug_LED_On();
+      HAL_SPI_Receive_DMA(&hspi1, image_data, 10000);
+      //Debug_LED_On();
 
       while (SPI_Rx_Done_Flag == 0)
       {
         // Wait for SPI transfer to finish
+        tud_task();
       }
       CS_Off();
       SPI_Rx_Done_Flag = 0;
@@ -317,7 +329,10 @@ int main(void)
     }
     else {
       LED_On();
-      tud_cdc_write(&sendT[currentSendingIndex], 10);
+      //tud_cdc_write("11111111\r\n", 10);
+      //tud_cdc_write_flush();
+      //tud_cdc_write(&sendT[currentSendingIndex], 10);
+      tud_cdc_write(&image_data[currentSendingIndex], 10);
       tud_cdc_write_flush();
       currentSendingIndex = currentSendingIndex + 10;
       HAL_Delay(5);

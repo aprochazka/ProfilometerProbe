@@ -1,0 +1,2 @@
+[submodule "Firmware/tinyusb"]
+	url = https://github.com/hathach/tinyusb

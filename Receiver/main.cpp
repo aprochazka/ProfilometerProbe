@@ -11,8 +11,11 @@
         struct termios tty;
 
 void readLoop(Receiver ** receiverPtr){
+    std::cout << "1" << std::endl;
     (*receiverPtr)->openStream();
+    std::cout << "2" << std::endl;
     (*receiverPtr)->initSerial();
+    std::cout << "3" << std::endl;
 
     while (true) {
         unsigned char character[10];

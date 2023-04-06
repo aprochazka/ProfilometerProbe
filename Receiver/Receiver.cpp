@@ -11,12 +11,13 @@ void Receiver::printHex(unsigned char value) {
 void Receiver::openStream(){
     while(1){
     // Open the CDC device file for reading
-        cdcFile = open("/dev/ttyACM1", O_RDWR | O_NOCTTY);
-        if (cdcFile == -1) {
+        cdcFile = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+        if(cdcFile == -1){
             std::cerr << "Failed to open CDC device file" << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             continue;
         }
+    
         std::cout << "successfully opened stream" << cdcFile << std::endl;
         break;
     }
@@ -28,7 +29,7 @@ int Receiver::initSerial(){
         std::cerr << "Error in tcgetattr" << std::endl;
         return -1;
     }
-    tcflush(cdcFile, TCIFLUSH);
+    //tcflush(cdcFile, TCIFLUSH);
     cfsetospeed(&tty, B115200);
     cfsetispeed(&tty, B115200);
     tty.c_cflag |= (CLOCAL | CREAD);
@@ -49,7 +50,7 @@ int Receiver::initSerial(){
     }
 
     std::cout << "OPENED!" << std::endl;
-    tcflush(cdcFile, TCIFLUSH);
+    //tcflush(cdcFile, TCIFLUSH);
     return 1;
 }
 
@@ -64,15 +65,13 @@ int Receiver::readCdcData(unsigned char (*character)[10]) {
         std::cerr << "Error in read" << std::endl;
         return -1;
     }
-    /*
     for(int i = 0; i<10; i++)
     {
         printHex((*character)[i]);
         //std::cout << unsigned(character[i]);
-        std::cout << " ";
-    }*/
-
-
+        //std::cout << " ";
+    }
+    std::cout << std::endl;
     return 0;
 }
 

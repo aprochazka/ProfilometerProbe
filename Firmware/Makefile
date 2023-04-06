@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 .PHONY: all build build-container cmake format format-linux flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 

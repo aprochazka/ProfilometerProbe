@@ -34,9 +34,9 @@ extern "C"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #define CFG_EXAMPLE_VIDEO_READONLY
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
 #include "stdbool.h"
 #include "tusb.h"
 #include "Cam.h"
