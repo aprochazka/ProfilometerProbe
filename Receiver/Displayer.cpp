@@ -33,7 +33,6 @@ int Displayer::renderWindow(){
 
 int Displayer::imageFromVector(std::vector<uint8_t>* img){
     imageRwops = SDL_RWFromMem(img->data(), img->size());
-
     return 0;
 }
 

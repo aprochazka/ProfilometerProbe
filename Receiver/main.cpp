@@ -5,29 +5,23 @@
 #include "Displayer.hpp"
 #endif
 
-#include "Transfer.hpp"
-
-        int cdcFile;
-        struct termios tty;
+ int cdcFile;
 
 void readLoop(Receiver ** receiverPtr){
-    std::cout << "1" << std::endl;
     (*receiverPtr)->openStream();
-    std::cout << "2" << std::endl;
     (*receiverPtr)->initSerial();
-    std::cout << "3" << std::endl;
 
     while (true) {
-        unsigned char character[10];
+        unsigned char character[50];
         (*receiverPtr)->readCdcData(&character);
         if((*receiverPtr)->findStart(&character) != -1)
         {std::cout << "start" << std::endl;}
         else if((*receiverPtr)->findEnd(&character) != -1)
         {std::cout << "stop" << std::endl;}
         else{
-          std::cout << "-";
+          std::cout << "-"; 
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     close(cdcFile);
@@ -42,7 +36,7 @@ void receiverLoop(Receiver ** receiverPtr){
   while(1){
     (*receiverPtr)->fillBuffer();
     (*receiverPtr)->bufferToDisplay();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
 }
 
@@ -51,12 +45,15 @@ int main()
   Displayer dis;
   Receiver *rec = new Receiver(&dis);
 
-  /*
+  
   dis.createWindow();
   dis.renderWindow();
 
   rec->openStream();
   rec->initSerial();
+  
+  rec->initTextures();
+
   rec->fillBuffer();
   rec->bufferToDisplay();
 
@@ -65,7 +62,7 @@ int main()
   dis.windowLoop();
 
   t1.join();
-  */
+  
 
   readLoop(&rec);
   return 0;
