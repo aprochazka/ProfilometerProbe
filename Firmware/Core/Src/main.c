@@ -271,85 +271,76 @@ int main(void)
   // Wait for power stabilization
   //HAL_Delay(1000);
 
-  Cam_Init(&hi2c1, &hspi1);
+  #define CDC_BUFF_SIZE 10000
 
-  int currentSendingIndex = 0;
+  int last_sent_idx = 0;
+  int buff_stop_idx = 0;
+  uint16_t image_size = 0;
+  uint8_t cdc_buff[CDC_BUFF_SIZE];
 
-
-  Cam_Capture(&hspi1);
-
-  uint16_t image_size = Cam_FIFO_length(&hspi1);
-
-  uint8_t image_data[10000];
-  memset(image_data, 0x00, 10000);
-
-  Cam_Start_Burst_Read(&hspi1);
-
-  //HAL_SPI_Receive_DMA(&hspi1, image_data, 10000);
-  HAL_SPI_Receive(&hspi1, image_data, 10000, HAL_MAX_DELAY);
-
-  LED_On();
-  while (SPI_Rx_Done_Flag == 0)
-  {
-    // Wait for SPI transfer to finish
-    break;
-  }
-
-  CS_Off();
-  SPI_Rx_Done_Flag = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  {
-    
+  {  
     tud_task();
 
-    if(currentSendingIndex >= 9949){
-    //if(false){
-      currentSendingIndex = 0;
-      //free(image_data);
-      for(int i = 0; i < 10000; i++) image_data[i] = 0x00;
+    if(buff_stop_idx >= (int)image_size){
+
+      buff_stop_idx = 0;
+      last_sent_idx = 0;
+
+      for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
+
+      CS_Off();
+      CS_On();
+
+      tud_task();
 
       Cam_Init(&hi2c1, &hspi1);
+  
+      tud_task();
 
       Cam_Capture(&hspi1);
 
+      tud_task();
+
       image_size = Cam_FIFO_length(&hspi1);
-
-      //image_data = malloc((image_size + (image_size%10)) * sizeof(uint8_t));
-      //memset(image_data, 0x00, image_size + (image_size%10));
-
       Cam_Start_Burst_Read(&hspi1);
 
-      HAL_SPI_Receive(&hspi1, image_data, 10000, HAL_MAX_DELAY);
-      //Debug_LED_On();
+      continue;
 
-      while (SPI_Rx_Done_Flag == 0)
-      {
-        // Wait for SPI transfer to finish
-        //tud_task();
-        break;
-      }
-      
-      CS_Off();
-      //SPI_Rx_Done_Flag = 0;
-      if(image_size < 1){
-        currentSendingIndex = 10000;
-        LED_On();      
-      } 
-    
+      //HAL_SPI_Receive(&hspi1, cdc_buff, CDC_BUFF_SIZE, HAL_MAX_DELAY);
     }
     else {
-      //tud_cdc_write("11111111\r\n", 10);
-      //tud_cdc_write_flush();
-      //tud_cdc_write(&sendT[currentSendingIndex], 50);
-      tud_cdc_write(&image_data[currentSendingIndex], 50);
-      tud_cdc_write_flush();
-      currentSendingIndex = currentSendingIndex + 50;
-      HAL_Delay(5);
+      int number_to_read = 0;
+      for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
+      if((buff_stop_idx + CDC_BUFF_SIZE) > (int) image_size){
+        number_to_read = (int) image_size - buff_stop_idx;
+      }
+      else{
+        number_to_read = CDC_BUFF_SIZE;
+      }
+
+      HAL_SPI_Receive(&hspi1, cdc_buff, number_to_read, HAL_MAX_DELAY);
+
+      buff_stop_idx = buff_stop_idx + number_to_read;
     }
+
+    int current_sending_idx = 0;
+    do{
+      tud_task();
+
+      tud_cdc_write(&cdc_buff[current_sending_idx], 50);
+      tud_cdc_write_flush();
+      current_sending_idx = current_sending_idx + 50;
+      last_sent_idx = last_sent_idx + 50;
+      HAL_Delay(3);
+    }
+    while(last_sent_idx < buff_stop_idx);
+
+    LED_On();
 
     /* USER CODE END WHILE */
 

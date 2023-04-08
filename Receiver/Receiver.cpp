@@ -53,9 +53,9 @@ int Receiver::initSerial(){
     return 1;
 }
 
-int Receiver::readCdcData(uint8_t (*character)[50]) {
-    memset(*character, 0x00, 50);
-    int bytesRead = read(cdcFile, character, 50);
+int Receiver::readCdcData(uint8_t (*character)[CDC_FRAME_SIZE]) {
+    memset(*character, 0x00, CDC_FRAME_SIZE);
+    int bytesRead = read(cdcFile, character, CDC_FRAME_SIZE);
     if (bytesRead == -1) {
         std::cerr << "Error in read" << std::endl;
         return -1;
@@ -65,21 +65,24 @@ int Receiver::readCdcData(uint8_t (*character)[50]) {
         return -1;
     }
     
-    /* PRINT WHAT IS RECEIVED
-    for(int i = 0; i<50; i++)
-    {
-        printHex((*character)[i]);
-        //std::cout << unsigned(character[i]);
-        std::cout << " ";
-    }
-    std::cout << std::endl << std::endl;
-    */
+    #if 0 // PRINT WHAT IS RECEIVED
+
+        for(int i = 0; i<CDC_FRAME_SIZE; i++)
+        {
+            printHex((*character)[i]);
+            //std::cout << unsigned(character[i]);
+            std::cout << " ";
+        }
+        std::cout << std::endl << std::endl;
+
+    #endif
+
 
     return 0;
 }
 
-int Receiver::simulateRead(unsigned char (*character)[50]){
-    memset(*character, 0x00, 50);
+int Receiver::simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]){
+    memset(*character, 0x00, CDC_FRAME_SIZE);
 
     int firstLen = (int)t1.size();
     int secondLen = (int)t2.size();
@@ -93,7 +96,7 @@ int Receiver::simulateRead(unsigned char (*character)[50]){
         vecId = 2;
     }
 
-    for(int i=0; i<50; i++){
+    for(int i=0; i<CDC_FRAME_SIZE; i++){
         if(vecId == 1){
             if(simulateIdx > firstLen){
                 (*character)[i] = 0x00;
@@ -118,7 +121,7 @@ int Receiver::simulateRead(unsigned char (*character)[50]){
 }
 
 int Receiver::fillBuffer(){
-    unsigned char character[50];
+    unsigned char character[CDC_FRAME_SIZE];
     std::vector<uint8_t> tempVec{};
     
     Receiver::readCdcData(&character);
@@ -183,6 +186,7 @@ void Receiver::bufferToDisplay(){
     currentBufferIndexMutex.lock();
     int buffIdx = currentBufferIndex;
     currentBufferIndexMutex.unlock();
+    std::cout << buffIdx << std::endl;
     switch(buffIdx){
         case 0:
             dis->vectorToTexture(&buffer1);
@@ -205,15 +209,15 @@ void Receiver::initTextures(){
     dis->vectorToTexture(&buffer_initial);    
 }
 
-int Receiver::findSequence(unsigned char (*str)[50], unsigned char ch1, unsigned char ch2){
+int Receiver::findSequence(unsigned char (*str)[CDC_FRAME_SIZE], unsigned char ch1, unsigned char ch2){
     if(sequenceEndedFF){
         sequenceEndedFF = 0;
         if((*str)[0] == ch2){
             return 0;
         }
     }
-    for(int i=0; i<50; i++){
-        if((*str)[i] == ch1 && i < 50){
+    for(int i=0; i<CDC_FRAME_SIZE; i++){
+        if((*str)[i] == ch1 && i < CDC_FRAME_SIZE){
             if((*str)[i+1] == ch2){
                 return i;
             }
@@ -225,12 +229,12 @@ int Receiver::findSequence(unsigned char (*str)[50], unsigned char ch1, unsigned
     return -1;
 }
 
-int Receiver::findStart(unsigned char (*str)[50]){
+int Receiver::findStart(unsigned char (*str)[CDC_FRAME_SIZE]){
     int res = findSequence(str, 0xFF, 0xD8);
     return res;
 }
 
-int Receiver::findEnd(unsigned char (*str)[50]){
+int Receiver::findEnd(unsigned char (*str)[CDC_FRAME_SIZE]){
     int res = findSequence(str, 0xFF, 0xD9);
     return res;
 }

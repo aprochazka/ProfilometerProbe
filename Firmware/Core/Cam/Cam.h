@@ -18,6 +18,8 @@ int Cam_I2C_write(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t data);
 int Cam_I2C_write_struct(I2C_HandleTypeDef *hi2c, sensor_reg reg);
 void Cam_I2C_write_bulk(I2C_HandleTypeDef *hi2c, const struct sensor_reg regList[]);
 void Cam_Init(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi);
+void Cam_Refresh(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi);
+
 int Cam_FIFO_length(SPI_HandleTypeDef *hspi);
 void Cam_Capture(SPI_HandleTypeDef *hspi);
 

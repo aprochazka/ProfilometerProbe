@@ -11,7 +11,7 @@ int Displayer::createWindow() {
     window = SDL_CreateWindow("Image Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_SHOWN);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s", SDL_GetError());
-        SDL_Quit();
+        //SDL_Quit();
         return 1;
     }
 
@@ -23,15 +23,29 @@ int Displayer::renderWindow(){
     
     if (!renderer) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create renderer: %s", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        //SDL_DestroyWindow(window);
+        //SDL_Quit();
         return 1;
     }
 
     return 0;
 }
+#define PRINT_BUFFER 0
+
 
 int Displayer::imageFromVector(std::vector<uint8_t>* img){
+        #if PRINT_BUFFER
+            std::cout << "______________" << std::endl;
+            
+            for(int i = 0; i<(int)(img)->size(); i++) 
+            {
+                std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>((*img)[i]) << " ";
+            }
+            std::cout << std::endl;
+
+            std::cout << "______________" << std::endl;
+        #endif
+
     imageRwops = SDL_RWFromMem(img->data(), img->size());
     return 0;
 }
@@ -40,10 +54,10 @@ int Displayer::createImageSurface(){
     imageSurface = IMG_Load_RW(imageRwops, 0);
     if (!imageSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load image: %s", IMG_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
+        //SDL_DestroyRenderer(renderer);
+        //SDL_DestroyWindow(window);
+        //SDL_Quit();
+        //return 1;
     }
     
     return 0;
@@ -130,8 +144,8 @@ int Displayer::windowLoop(){
     return 0;
 }
 
+
 int Displayer::vectorToTexture(std::vector<uint8_t>* img){
-        
         imageFromVector(img);
         createImageSurface();
         textureFromSurface();

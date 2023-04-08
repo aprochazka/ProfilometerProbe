@@ -57,7 +57,7 @@ class Receiver{
         Receiver(Displayer *displayerPtr);
         void openStream();
         int initSerial();
-        int readCdcData(unsigned char (*character)[50]);
+        int readCdcData(unsigned char (*character)[CDC_FRAME_SIZE]);
 
         void printHex(unsigned char value);
         int fillBuffer();
@@ -65,9 +65,9 @@ class Receiver{
         void bufferToDisplay();
         void initTextures();
 
-        int findSequence(unsigned char (*str)[50], unsigned char ch1, unsigned char ch2);
-        int findStart(unsigned char (*str)[50]);
-        int findEnd(unsigned char (*str)[50]);
+        int findSequence(unsigned char (*str)[CDC_FRAME_SIZE], unsigned char ch1, unsigned char ch2);
+        int findStart(unsigned char (*str)[CDC_FRAME_SIZE]);
+        int findEnd(unsigned char (*str)[CDC_FRAME_SIZE]);
         
-        int simulateRead(unsigned char (*character)[50]);
+        int simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]);
 };

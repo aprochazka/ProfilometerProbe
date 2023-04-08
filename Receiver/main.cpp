@@ -12,7 +12,7 @@ void readLoop(Receiver ** receiverPtr){
     (*receiverPtr)->initSerial();
 
     while (true) {
-        unsigned char character[50];
+        unsigned char character[CDC_FRAME_SIZE];
         (*receiverPtr)->readCdcData(&character);
         if((*receiverPtr)->findStart(&character) != -1)
         {std::cout << "start" << std::endl;}
@@ -21,7 +21,7 @@ void readLoop(Receiver ** receiverPtr){
         else{
           std::cout << "-"; 
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
 
     close(cdcFile);
@@ -36,7 +36,7 @@ void receiverLoop(Receiver ** receiverPtr){
   while(1){
     (*receiverPtr)->fillBuffer();
     (*receiverPtr)->bufferToDisplay();
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(3));
   }
 }
 

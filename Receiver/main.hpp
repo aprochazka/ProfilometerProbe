@@ -14,3 +14,5 @@
 #include <chrono>
 #include <mutex>
 #include <fstream>
+
+#define CDC_FRAME_SIZE 50

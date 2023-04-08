@@ -133,7 +133,35 @@ void Cam_Init(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi)
     Cam_I2C_write(hi2c, (uint16_t)0x3801, 0xb0); // TIMING HORIZONTAL START - ALSO FOR MIRROR
     Cam_I2C_write(hi2c, (uint16_t)0x4407, 0x04); // COMPRESSION CONTROL
 
-    Cam_I2C_write_bulk(hi2c, ov5642_320x240);
+    //Cam_I2C_write_bulk(hi2c, ov5642_320x240);
+    //Cam_I2C_write_bulk(hi2c, ov5642_640x480);
+
+    Cam_I2C_write_bulk(hi2c, ov5642_1280x960);
+
+    // Setup camera, H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
+    Cam_SPI_write(hspi, 0x03, 0x02);
+    Cam_SPI_write(hspi, 0x01, 0x00); // Capture Control Register - Set to capture n+1 frames
+
+    HAL_Delay(5);
+}
+
+void Cam_Refresh(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi){
+    Cam_I2C_write(hi2c, (uint16_t)0x3008, 0x80);
+
+    Cam_I2C_write_bulk(hi2c, OV5642_QVGA_Preview);
+
+    Cam_I2C_write_bulk(hi2c, OV5642_JPEG_Capture_QSXGA);
+
+    //Cam_I2C_write_bulk(hi2c, OV5642_720P_Video_setting);
+
+    Cam_I2C_write(hi2c, (uint16_t)0x3818, 0xa8); // TIMING CONTROL - ENABLE COMPRESSION, THUMBNAIL MODE DISABLE, VERTICAL FLIP, MIRROR
+    Cam_I2C_write(hi2c, (uint16_t)0x3621, 0x10); // REGISTER FOR CORRECT MIRROR FUNCTION
+    Cam_I2C_write(hi2c, (uint16_t)0x3801, 0xb0); // TIMING HORIZONTAL START - ALSO FOR MIRROR
+    Cam_I2C_write(hi2c, (uint16_t)0x4407, 0x04); // COMPRESSION CONTROL
+
+    //Cam_I2C_write_bulk(hi2c, ov5642_320x240);
+    //ov5642_1024x768
+    Cam_I2C_write_bulk(hi2c, ov5642_1024x768);
 
     // Setup camera, H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
     Cam_SPI_write(hspi, 0x03, 0x02);
