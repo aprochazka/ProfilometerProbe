@@ -32,11 +32,18 @@ void windowFlipThread(Displayer * displayerPtr){
   displayerPtr->flipThroughTextures();
 }
 
+void WrapperBufferToDisplay(Receiver ** receiverPtr){
+  (*receiverPtr)->bufferToDisplay();
+}
+
 void receiverLoop(Receiver ** receiverPtr){
+  std::vector<std::thread> displayThreads;
   while(1){
+
     (*receiverPtr)->fillBuffer();
-    (*receiverPtr)->bufferToDisplay();
-    std::this_thread::sleep_for(std::chrono::milliseconds(3));
+        
+    std::thread t2(WrapperBufferToDisplay, receiverPtr);
+    t2.detach();
   }
 }
 

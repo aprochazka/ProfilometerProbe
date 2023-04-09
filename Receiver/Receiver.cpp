@@ -64,7 +64,6 @@ int Receiver::readCdcData(uint8_t (*character)[CDC_FRAME_SIZE]) {
         std::cerr << "Error in read" << std::endl;
         return -1;
     }
-    
     #if 0 // PRINT WHAT IS RECEIVED
 
         for(int i = 0; i<CDC_FRAME_SIZE; i++)
@@ -76,7 +75,6 @@ int Receiver::readCdcData(uint8_t (*character)[CDC_FRAME_SIZE]) {
         std::cout << std::endl << std::endl;
 
     #endif
-
 
     return 0;
 }
@@ -123,8 +121,6 @@ int Receiver::simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]){
 int Receiver::fillBuffer(){
     unsigned char character[CDC_FRAME_SIZE];
     std::vector<uint8_t> tempVec{};
-    
-    Receiver::readCdcData(&character);
     
     int i = -1;
     do {
@@ -186,15 +182,17 @@ void Receiver::bufferToDisplay(){
     currentBufferIndexMutex.lock();
     int buffIdx = currentBufferIndex;
     currentBufferIndexMutex.unlock();
-    std::cout << buffIdx << std::endl;
     switch(buffIdx){
         case 0:
+            std::cout << buffer1.size() << std::endl;
             dis->vectorToTexture(&buffer1);
             break;
         case 1:
+            std::cout << buffer2.size() << std::endl;
             dis->vectorToTexture(&buffer2);
             break;
         case 2:
+            std::cout << buffer3.size() << std::endl;
             dis->vectorToTexture(&buffer3);
             break;
         default:

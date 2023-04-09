@@ -15,4 +15,5 @@
 #include <mutex>
 #include <fstream>
 
-#define CDC_FRAME_SIZE 50
+#define CDC_FRAME_SIZE 64
+#define CDC_FRAME_DELAY 1

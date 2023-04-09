@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -pthread -std=c++11 -Wall -Wextra -pedantic
+CFLAGS = -pthread -std=c++11 -Wall -Wextra -pedantic -O3
 LDLIBS = -lSDL2 -lSDL2_image
 SRCS = $(wildcard *.cpp)
 
