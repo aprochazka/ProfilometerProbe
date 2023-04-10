@@ -86,7 +86,7 @@ void Error_Handler(void);
 #define LD3_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define CDC_BUFF_SIZE 10048
+#define CDC_BUFF_SIZE 12800
 #define CDC_FRAME_SIZE 64
 #define CDC_FRAME_DELAY 1
 /* USER CODE END Private defines */
