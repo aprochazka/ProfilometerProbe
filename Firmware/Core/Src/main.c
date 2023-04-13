@@ -73,20 +73,6 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void SysTick_Init(void)
-{
-  SysTick_Config(SystemCoreClock / 10000); // Set SysTick interrupt to occur every 100us
-}
-
-void delay_us(uint32_t us)
-{
-  uint32_t start = SysTick->VAL;
-  uint32_t ticks = us * 10;
-  
-  while ((start - SysTick->VAL) < ticks);
-}
-
 /* USER CODE END 0 */
 
 /**
@@ -96,7 +82,6 @@ void delay_us(uint32_t us)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  LED_On();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -124,24 +109,24 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
-  //MX_DAC1_Init();
-  //MX_TIM15_Init();
+  LED_On();
+
   HAL_PWREx_EnableVddUSB();
   HAL_Delay(1);
+
   tud_init(BOARD_DEVICE_RHPORT_NUM);
 
   HAL_Delay(10);
   SPI_Init(&hspi1);
-
-  // Wait for power stabilization
-  //HAL_Delay(1000);
 
   tud_task();
 
   int last_sent_idx = 0;
   int buff_stop_idx = 0;
   uint16_t image_size = 0;
-  uint8_t cdc_buff[CDC_BUFF_SIZE];
+  uint8_t cdc_buff[CDC_BUFF_SIZE+CDC_FRAME_SIZE];
+  for(int i = 0; i < (CDC_BUFF_SIZE+CDC_FRAME_SIZE); i++) cdc_buff[i] = 0x00;
+
 
   Cam_Init(&hi2c1, &hspi1);
 
@@ -160,21 +145,12 @@ int main(void)
       buff_stop_idx = 0;
       last_sent_idx = 0;
 
-      for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
+      //for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
 
       CS_Off();
       CS_On();
 
-      tud_task();
-
-      //Cam_Refresh(&hi2c1, &hspi1);
-      //Cam_Init(&hi2c1, &hspi1);
-
-      tud_task();
-
       Cam_Capture(&hspi1);
-
-      tud_task();
 
       image_size = Cam_FIFO_length(&hspi1);
       Cam_Start_Burst_Read(&hspi1);
@@ -185,8 +161,10 @@ int main(void)
 
     }
     else {
+      LED_Off();
+
       int number_to_read = 0;
-      for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
+      //for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
       if((buff_stop_idx + CDC_BUFF_SIZE) > (int) image_size){
         number_to_read = (int) image_size - buff_stop_idx;
       }
@@ -197,6 +175,8 @@ int main(void)
       HAL_SPI_Receive(&hspi1, cdc_buff, number_to_read, HAL_MAX_DELAY);
 
       buff_stop_idx = buff_stop_idx + number_to_read;
+      
+      LED_On();
     }
 
     int current_sending_idx = 0;
@@ -214,11 +194,9 @@ int main(void)
       tud_cdc_write_flush();
       //Delay between sends
       int i = 0;
-      for(;i<7000;i++);
+      for(;i<4000;i++);
     }
     while(last_sent_idx < buff_stop_idx);
-
-
 
     /* USER CODE END WHILE */
 
