@@ -39,9 +39,11 @@ extern "C" {
 #include "tusb.h"
 #include "Cam.h"
 #include "usb_descriptors.h"
+#include "VL53L1X_api.h"
+//#include "Distance.h"
 
-    // #include "portable/st/synopsys/dcd_synopsys.c"
-    // #include "portable/st/synopsys/synopsys_common.h"
+// #include "portable/st/synopsys/dcd_synopsys.c"
+// #include "portable/st/synopsys/synopsys_common.h"
 
 /* USER CODE END Includes */
 
@@ -68,6 +70,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+
+extern I2C_HandleTypeDef hi2c1;
+
+
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOA
 #define DEBUG_LED_Pin GPIO_PIN_1

@@ -11,7 +11,7 @@ void Receiver::printHex(unsigned char value) {
 void Receiver::openStream(){
     while(1){
     // Open the CDC device file for reading
-        cdcFile = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+        cdcFile = open("/dev/ttyACM1", O_RDWR | O_NOCTTY);
         if(cdcFile == -1){
             std::cerr << "Failed to open CDC device file" << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -118,6 +118,49 @@ int Receiver::simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]){
     return 0;
 }
 
+int Receiver::getDistance(){
+    uint16_t dist = 0;
+    int distCorrupted = 1;
+    unsigned char distanceFrame[12];
+    int bytesRead = read(cdcFile, distanceFrame, 12);
+    if(bytesRead == -1){
+            std::cout<<"ERROR IN READ!!! ";
+    }
+    std::cout<<"distance: ";
+    for(int i=0; i<7; i++){
+        if(distanceFrame[i] == 0xff && distanceFrame[i+1] == 0x69 && distanceFrame [i+4] == 0xff && distanceFrame[i+5] == 0x69){
+            
+            
+            
+            
+
+            dist = (distanceFrame[i+2] << 8 | distanceFrame[i+3]);
+
+
+            std::cout << " - " << static_cast<int>(dist) << " - ";
+            
+            Receiver::printHex(distanceFrame[i+2]);
+            std::cout << " ";
+            Receiver::printHex(distanceFrame[i+3]);
+            std::cout << std::endl;
+            
+            distCorrupted = 0;
+            
+            return 0;
+        }
+    }
+    if(distCorrupted) {
+            std::cout << "Corrupted :( -> ";
+            for(int i = 0; i<12; i++) {
+                Receiver::printHex(distanceFrame[i]);
+                std::cout << " ";
+            }
+            std::cout << std::endl;
+    }
+    
+    return 1;
+}
+
 int Receiver::fillBuffer(){
     unsigned char character[CDC_FRAME_SIZE];
     std::vector<uint8_t> tempVec{};
@@ -142,6 +185,8 @@ int Receiver::fillBuffer(){
     
     tempVec.insert(tempVec.end(), character, character + i + 2);
     
+    Receiver::getDistance();
+
     //////////// SAVE FRAMES TO FILES
     /*
     std::ofstream outfile(std::to_string(debugFileIdx) + ".jpg", std::ios::out | std::ios::binary);
@@ -184,15 +229,15 @@ void Receiver::bufferToDisplay(){
     currentBufferIndexMutex.unlock();
     switch(buffIdx){
         case 0:
-            std::cout << buffer1.size() << std::endl;
+            //std::cout << buffer1.size() << std::endl;
             dis->vectorToTexture(&buffer1);
             break;
         case 1:
-            std::cout << buffer2.size() << std::endl;
+            //std::cout << buffer2.size() << std::endl;
             dis->vectorToTexture(&buffer2);
             break;
         case 2:
-            std::cout << buffer3.size() << std::endl;
+            //std::cout << buffer3.size() << std::endl;
             dis->vectorToTexture(&buffer3);
             break;
         default:

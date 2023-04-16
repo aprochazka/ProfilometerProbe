@@ -58,9 +58,11 @@ class Receiver{
         void openStream();
         int initSerial();
         int readCdcData(unsigned char (*character)[CDC_FRAME_SIZE]);
-
+        
         void printHex(unsigned char value);
         int fillBuffer();
+
+        int getDistance();
 
         void bufferToDisplay();
         void initTextures();
@@ -68,6 +70,6 @@ class Receiver{
         int findSequence(unsigned char (*str)[CDC_FRAME_SIZE], unsigned char ch1, unsigned char ch2);
         int findStart(unsigned char (*str)[CDC_FRAME_SIZE]);
         int findEnd(unsigned char (*str)[CDC_FRAME_SIZE]);
-        
+
         int simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]);
 };

@@ -40,7 +40,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_spi1_tx;
@@ -48,6 +47,11 @@ DMA_HandleTypeDef hdma_spi1_tx;
 UART_HandleTypeDef huart2;
 
 PCD_HandleTypeDef hpcd_USB_FS;
+
+uint16_t	dev=0x52;
+int status=0;
+volatile int IntCount;
+#define isInterrupt 1 /* If isInterrupt = 1 then device working in interrupt mode, else device working in polling mode */
 
 /* USER CODE BEGIN PV */
 //DAC_HandleTypeDef hdac1;
@@ -82,6 +86,16 @@ static void MX_USB_PCD_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  //uint8_t byteData, sensorState=0;
+  //uint16_t wordData;
+  //uint8_t ToFSensor = 1; // 0=Left, 1=Center(default), 2=Right
+  uint16_t Distance = 0;
+  uint16_t SignalRate;
+  uint16_t AmbientRate;
+  uint16_t SpadNum; 
+  uint8_t RangeStatus;
+  //uint8_t dataReady;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -109,9 +123,28 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+  HAL_PWREx_EnableVddUSB();
+  HAL_Delay(100);
+
+  //ToFSensor = 1; // Select ToFSensor: 0=Left, 1=Center, 2=Right
+
+  status = VL53L1X_SensorInit(dev);
+  status = VL53L1X_SetDistanceMode(dev, 2);
+  status = VL53L1X_SetTimingBudgetInMs(dev, 100);
+  status = VL53L1X_SetInterMeasurementInMs(dev, 100);
+  status = VL53L1X_StartRanging(dev);
+
+  HAL_Delay(1000);
+	
+  status = VL53L1X_GetRangeStatus(dev, &RangeStatus);
+	status = VL53L1X_GetDistance(dev, &Distance);
+	status = VL53L1X_GetSignalRate(dev, &SignalRate);
+	status = VL53L1X_GetAmbientRate(dev, &AmbientRate);
+	status = VL53L1X_GetSpadNb(dev, &SpadNum);
+	status = VL53L1X_ClearInterrupt(dev);
+
   LED_On();
 
-  HAL_PWREx_EnableVddUSB();
   HAL_Delay(1);
 
   tud_init(BOARD_DEVICE_RHPORT_NUM);
@@ -127,6 +160,7 @@ int main(void)
   uint8_t cdc_buff[CDC_BUFF_SIZE+CDC_FRAME_SIZE];
   for(int i = 0; i < (CDC_BUFF_SIZE+CDC_FRAME_SIZE); i++) cdc_buff[i] = 0x00;
 
+  //Distance_Sensor_Init(&hi2c1);
 
   Cam_Init(&hi2c1, &hspi1);
 
@@ -146,6 +180,10 @@ int main(void)
       last_sent_idx = 0;
 
       //for(int i = 0; i < CDC_BUFF_SIZE; i++) cdc_buff[i] = 0x00;
+      
+      VL53L1X_GetDistance(dev, &Distance);
+      HAL_Delay(2);
+      VL53L1X_ClearInterrupt(dev);
 
       CS_Off();
       CS_On();
@@ -154,6 +192,8 @@ int main(void)
 
       image_size = Cam_FIFO_length(&hspi1);
       Cam_Start_Burst_Read(&hspi1);
+
+      //getDistance(&hi2c1);
 
       LED_On();
 
@@ -198,6 +238,29 @@ int main(void)
     }
     while(last_sent_idx < buff_stop_idx);
 
+    if(buff_stop_idx >= (int)image_size){
+      HAL_Delay(100);
+      tud_task();
+      uint8_t distance_buff[12];
+      distance_buff[0] = 0xff;
+      distance_buff[1] = 0xff;
+      distance_buff[2] = 0xff;
+      distance_buff[3] = 0x69;
+      distance_buff[4] = (uint8_t)(Distance >> 8);
+      distance_buff[5] = (Distance & 0xff);
+      distance_buff[6] = 0xff;
+      distance_buff[7] = 0x69;
+      distance_buff[8] = 0xff;
+      distance_buff[9] = 0xff;
+      distance_buff[10] = '\n';
+      distance_buff[11] = '\r';
+
+      tud_cdc_write(&distance_buff[0], 12);
+      HAL_Delay(1);
+      tud_cdc_write_flush();
+      HAL_Delay(1);
+      tud_task();
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
