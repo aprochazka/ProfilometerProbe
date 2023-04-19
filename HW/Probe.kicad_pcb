@@ -5,6 +5,12 @@
   )
 
   (paper "A4")
+  (title_block
+    (title "Nucleo Based Profilometer Probe")
+    (date "2023-04-19")
+    (rev "1.0")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" power)

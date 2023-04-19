@@ -4,6 +4,12 @@
 
   (paper "A4")
 
+  (title_block
+    (title "Nucleo Based Profilometer Probe")
+    (date "2023-04-19")
+    (rev "1.0")
+  )
+
   (lib_symbols
     (symbol "Conn_01x01_2" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (at 0 2.54 0)
@@ -1344,8 +1350,8 @@
     (pin "D7" (uuid c867e35d-e09e-41d9-bb6b-37a96500c959))
     (pin "D8" (uuid 41cd55f1-8f00-49d1-aba3-528510c49a8f))
     (pin "D9" (uuid c16579e6-d3cb-4ca0-8ab0-91f8fcf0a52f))
-    (pin "GND" (uuid b7db2c5b-9b2e-48cc-8df3-ae5b7be90642))
-    (pin "GND" (uuid b7db2c5b-9b2e-48cc-8df3-ae5b7be90642))
+    (pin "GND" (uuid b7db2c5b-9b2e-48cc-8df3-ae5b7be90643))
+    (pin "GND" (uuid b7db2c5b-9b2e-48cc-8df3-ae5b7be90643))
     (pin "REF" (uuid 17415177-219c-44b5-a5ec-e0e0d9245c1a))
     (pin "RST3" (uuid 4a5e6df9-4172-4e24-8c6f-08a38cf70822))
     (pin "RST4" (uuid 60da45ef-156e-4fab-bdb8-0c9c685c1997))
