@@ -1,5 +1,19 @@
+/**
+ * @file Displayer.hpp
+ * @brief Header file for the Displayer class.
+ * @author Adam Prochazka <xproch0f>
+ *
+ * This file contains the declaration of the Displayer class which is responsible for
+ * rendering the images received from the Receiver class.
+ */
+
 #include "main.hpp"
 #define DISPLAYER_HPP
+
+/*!
+ * \class  Displayer
+ * \brief  This class is responsible for displaying image data to user, that includes storing image bytes inside buffer, creating textures from those bytes, rendering UI and updating UI.
+ */
 class Displayer {
     private:
         SDL_Window* window;
@@ -16,19 +30,63 @@ class Displayer {
         std::mutex currentTextureIndexMutex;
 
     public:
+        /*!
+        * \brief Create the main SDL window.
+        * \return 0 on success, 1 on failure.
+        */
         int createWindow();
+
+        /*!
+        * \brief Render the main SDL window.
+        * \return 0 on success, 1 on failure.
+        */
         int renderWindow();
 
-        int imageFromVector(std::vector<uint8_t>* img);
+        /*!
+        * \brief Copy image data from a vector to an SDL_RWops structure.
+        * \param[in] img A pointer to the vector containing the image data.
+        * @param printRaw Bool that indicates weather received byte data should be printed to std::out (for debug).
+        * \return 0.
+        */
+        int imageFromVector(std::vector<uint8_t>* img, bool printRaw = false);
+
+        /*!
+        * \brief Create an SDL_Surface from the SDL_RWops structure containing image data.
+        * \return 0 on success, 1 on failure.
+        */
         int createImageSurface();
+
+        /*!
+        * \brief Create an SDL_Texture from an SDL_Surface and store it to last recently used texture buffer.
+        * \return 0 on success, 1 on failure.
+        */
         int textureFromSurface();
 
-        int vectorToTexture(std::vector<uint8_t>* img);
+        /*!
+         * \brief Convert a vector of image data to an SDL_Texture and store it to laset recently used texture buffer.
+         * \param[in] img A pointer to the vector containing the image data.
+         * @param printRaw Bool that indicates weather received byte data should be printed to std::out (for debug).
+         * \return 0.
+         */
+        int vectorToTexture(std::vector<uint8_t>* img, bool printRaw = false);
 
+        /*!
+         * \brief Destroy the main SDL window, SDL renderer and SDL textures stored in buffers.
+         * \return 0 on success, 1 on failure.
+         */
         int windowDestroy();
 
-        int windowLoop();
 
+        /*!
+        * \brief Run the main window loop, refresh currently rendered texture buffer with newest one from texture buffers.
+        * \return 0.
+        */
+        int windowLoop(bool *q);
+
+        /*!
+         * \brief Test function to see if rendering works by infinitelly flipping between two predefined textures.
+         * \return 0.
+         */
         int flipThroughTextures();
 
 };

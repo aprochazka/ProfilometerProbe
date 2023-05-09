@@ -1,54 +1,60 @@
 # Profilometer Probe
+
+![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Render.png?raw=true)
+![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Assembled.png?raw=true)
+
+## Hardware
+
+### Models
+
+- All 3D printable models are located inside Models folder
+- Models are designed to be printed with standard 2mm layer height
+- When slicing be sure to print outer walls first to make print more accurate
+
+### Components
+
+- Development board: Nucleo L432KC
+- Camera: ArduCam mini 5MP Plus
+- Distance sensor: Pimoroni LV53L1X
+- Complete list of components and connectors for probe can be found inside HW/Parts.md
+
 ## Firmware for profilometer probe
-
-### Build
-
-- Build using Makefile inside Firmware folder
-- Flash onto hardware using flash option for make command `$ make flash`
-
-### Supported HW:
-- Nucleo L432KC 
-- Arducam 5MP Plus
-
-
-### HW Setup
-
-Before running code, connect camera module to microcontroler through pins described in .ioc file (open with STM32CubeMX) or in table below.
-
-| Name        | Nucleo L432KC | Arducam 5MP Plus |
-| ----------- | ------------- | ---------------- |
-| SPI SCLK    | A4            | SCK              |
-| SPI MISO    | A5            | MISO             |
-| SPI MOSI    | A6            | MOSI             |
-| SPI CS      | D3            | CS               |
-| I2C SCL     | D1            | SCL              |
-| I2C SDA     | D0            | SDA              |
-
-You can connect optional Debug LED to A1 pin in Nucleo board.
 
 #### Probe design block Scheme
 ![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/deviceScheme.png?raw=true)
 
-### Current State
+### Build
 
-- Sends test JPEG image sequence through USB CDC
+- Build using Makefile inside Firmware folder (dependency: arm-none-eabi)
+- Flash onto hardware using flash option for make command `$ make flash`
 
-### Test Current State
+### Usage
 
-- Tested on: Arch Linux
+- Connect probe to pc using usb c cable and firmware will start sending sending data automatically
 
-- Inside Receiver folder build using Makefile  
+### Documentation
 
-- Code counts with CDC device on /dev/ttyACM2 (can be changed in code)
+- Create documentation using 'doc' option of Makefile '$ make doc' 
 
-- Run with sudo permission, so that serial port is openable
+## Software for receiving data
 
-### Test Script Usage - outdated
+### Build
 
-- Build test app using provided Makefile and then run the executable
+- Build using Makefile inside Receiver folder
 
-- App will then start saving files received by uart to filesystem
+### Usage
 
-### In progress
+- Has to be run with sudo permissions to correctly access USB CDC port.
+- '$ sudo ./main -p <name of the port> [-s Save received jpeg to files] [-r Print raw received CDC data to standard output]'
+- Prefer running with optional -s command for ability to inspect already captured images 
+
+### Documentation
+
+- Create documentation using 'doc' option of Makefile '$ make doc' 
+
+### TODO
+
+- Process image and filter only laser line from it
+- Use precessed data to determine depth or height of irregularities 
 
 

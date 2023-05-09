@@ -1,4 +1,15 @@
-/*
+/**
+ ******************************************************************************
+ * @file           : usb_descriptors.c
+ * @brief          : Descriptors of usb communication.
+ * @author         : Adam Prochazka <xproch0f>
+ ******************************************************************************
+ 
+ * @attention
+ *
+ * File was from the large part taken from the TinyUSB repository and just slightly configured for projects usecase. 
+ * Original file contains this disclaimer:
+ * 
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
@@ -216,11 +227,11 @@ uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 // array of pointer to string descriptors
 char const* string_desc_arr [] =
 {
-  (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
-  "TinyUSB",                     // 1: Manufacturer
-  "TinyUSB test STM32L432",      // 2: Product
-  "123456",                      // 3: Serials, should use chip ID
-  "TinyUSB CDC",                 // 4: CDC Interface
+  (const char[]) { 0x09, 0x04 },  // 0: is supported language is English (0x0409)
+  "Adam Prochazka",               // 1: Manufacturer
+  "Profilometer Probe",           // 2: Product
+  "2023",                         // 3: Serials, should use chip ID
+  "TinyUSB CDC",                  // 4: CDC Interface
 };
 
 static uint16_t _desc_str[32];

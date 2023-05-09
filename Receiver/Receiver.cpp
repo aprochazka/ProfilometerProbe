@@ -1,3 +1,12 @@
+/**
+ * @file Receiver.cpp
+ * @brief Source file for the Receiver class.
+ * @author Adam Prochazka <xproch0f>
+ *
+ * This file contains the implementation of the Receiver class which is responsible for
+ * managing the serial communication and processing the received data to display images.
+ */
+
 #include "Receiver.hpp"
 
 Receiver::Receiver(Displayer *displayerPtr){
@@ -8,10 +17,10 @@ void Receiver::printHex(unsigned char value) {
     std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(value);
 }
 
-void Receiver::openStream(){
+void Receiver::openStream(char * port){
     while(1){
-    // Open the CDC device file for reading
-        cdcFile = open("/dev/ttyACM1", O_RDWR | O_NOCTTY);
+        // Open the CDC device file for reading
+        cdcFile = open(port, O_RDWR | O_NOCTTY);
         if(cdcFile == -1){
             std::cerr << "Failed to open CDC device file" << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -23,13 +32,18 @@ void Receiver::openStream(){
     }
 }
 
+void Receiver::closeStream(){
+    close(cdcFile);
+}
+
 int Receiver::initSerial(){
     memset(&tty, 0, sizeof(tty));
     if (tcgetattr(cdcFile, &tty) != 0) {
         std::cerr << "Error in tcgetattr" << std::endl;
         return -1;
     }
-    //tcflush(cdcFile, TCIFLUSH);
+
+    //CDC communication configuration
     cfsetospeed(&tty, B115200);
     cfsetispeed(&tty, B115200);
     tty.c_cflag |= (CLOCAL | CREAD);
@@ -119,49 +133,25 @@ int Receiver::simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]){
 }
 
 int Receiver::getDistance(){
-    uint16_t dist = 0;
-    int distCorrupted = 1;
     unsigned char distanceFrame[12];
     int bytesRead = read(cdcFile, distanceFrame, 12);
+    
     if(bytesRead == -1){
             std::cout<<"ERROR IN READ!!! ";
     }
-    std::cout<<"distance: ";
+
     for(int i=0; i<7; i++){
         if(distanceFrame[i] == 0xff && distanceFrame[i+1] == 0x69 && distanceFrame [i+4] == 0xff && distanceFrame[i+5] == 0x69){
-            
-            
-            
-            
-
-            dist = (distanceFrame[i+2] << 8 | distanceFrame[i+3]);
-
-
-            std::cout << " - " << static_cast<int>(dist) << " - ";
-            
-            Receiver::printHex(distanceFrame[i+2]);
-            std::cout << " ";
-            Receiver::printHex(distanceFrame[i+3]);
-            std::cout << std::endl;
-            
-            distCorrupted = 0;
-            
-            return 0;
+            distance = (distanceFrame[i+2] << 8 | distanceFrame[i+3]);
         }
     }
-    if(distCorrupted) {
-            std::cout << "Corrupted :( -> ";
-            for(int i = 0; i<12; i++) {
-                Receiver::printHex(distanceFrame[i]);
-                std::cout << " ";
-            }
-            std::cout << std::endl;
-    }
-    
+
+    std::cout << " Distance: " << std::dec << distance << "  mm" << std::endl;
+
     return 1;
 }
 
-int Receiver::fillBuffer(){
+int Receiver::fillBuffer(bool saveToFile){
     unsigned char character[CDC_FRAME_SIZE];
     std::vector<uint8_t> tempVec{};
     
@@ -187,18 +177,16 @@ int Receiver::fillBuffer(){
     
     Receiver::getDistance();
 
-    //////////// SAVE FRAMES TO FILES
-    /*
-    std::ofstream outfile(std::to_string(debugFileIdx) + ".jpg", std::ios::out | std::ios::binary);
-    if (!outfile.is_open()) {
-        std::cerr << "Failed to create file " << debugFileIdx << ".jpg" << std::endl;
-        return 1;
+    if(saveToFile){
+        std::ofstream outfile(std::to_string(debugFileIdx) + "_" + std::to_string(distance) + "_mm" + ".jpg", std::ios::out | std::ios::binary);
+        if (!outfile.is_open()) {
+            std::cerr << "Failed to create file " << debugFileIdx << ".jpg" << std::endl;
+            return 1;
+        }
+        outfile.write(reinterpret_cast<const char*>(tempVec.data()), tempVec.size());
+        outfile.close();
+        debugFileIdx++;
     }
-    outfile.write(reinterpret_cast<const char*>(tempVec.data()), tempVec.size());
-    outfile.close();
-    debugFileIdx++;
-    */
-    ////////////
 
     currentBufferIndexMutex.lock();
     
@@ -223,22 +211,19 @@ int Receiver::fillBuffer(){
     return 1;
 }
 
-void Receiver::bufferToDisplay(){
+void Receiver::bufferToDisplay(bool printRaw){
     currentBufferIndexMutex.lock();
     int buffIdx = currentBufferIndex;
     currentBufferIndexMutex.unlock();
     switch(buffIdx){
         case 0:
-            //std::cout << buffer1.size() << std::endl;
-            dis->vectorToTexture(&buffer1);
+            dis->vectorToTexture(&buffer1, printRaw);
             break;
         case 1:
-            //std::cout << buffer2.size() << std::endl;
-            dis->vectorToTexture(&buffer2);
+            dis->vectorToTexture(&buffer2, printRaw);
             break;
         case 2:
-            //std::cout << buffer3.size() << std::endl;
-            dis->vectorToTexture(&buffer3);
+            dis->vectorToTexture(&buffer3, printRaw);
             break;
         default:
             std::cout << "error 86" << std::endl;

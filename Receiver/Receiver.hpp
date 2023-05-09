@@ -1,9 +1,23 @@
+/**
+ * @file Receiver.hpp
+ * @brief Header file for the Receiver class.
+ * @author Adam Prochazka <xproch0f>
+ *
+ * This file contains the declaration of the Receiver class which is responsible for
+ * managing the serial communication and processing the received data to display images.
+ */
+
+
 #include "main.hpp"
 
 #ifndef DISPLAYER_HPP
 #include "Displayer.hpp"
 #endif
 
+/**
+ * @class Receiver
+ * @brief Handles receiving data from the serial port and buffering the data for the Displayer.
+ */
 class Receiver{
     private:
         int cdcFile;
@@ -49,27 +63,99 @@ class Receiver{
         std::vector<uint8_t> buffer3;
         Displayer *dis;
 
-        int sequenceEndedFF = 0;
+        int distance = 0;
+        int sequenceEndedFF = 0; ///< Flag to indicate if the sequence has ended with 0xFF.
         int simulateIdx = 0;
 
         int debugFileIdx = 0;
     public:
+        /**
+        * @brief Constructor for the Receiver class.
+        * @param displayerPtr Pointer to the Displayer instance.
+        */
         Receiver(Displayer *displayerPtr);
-        void openStream();
+
+        /**
+        * @brief Opens the serial port stream.
+        * @param port Name of serial port to be openned.
+        */
+        void openStream(char * port);
+        
+        /**
+        * @brief Closes the serial port stream.
+        */
+        void closeStream();
+
+        /**
+        * @brief Initializes the serial port settings.
+        * @return 1 if successful, -1 if an error occurred.
+        */
         int initSerial();
+
+        /**
+        * @brief Reads data from the CDC device.
+        * @param[out] character Pointer to the character buffer to store the read data.
+        * @return 0 if successful, -1 if error occurred.
+        */
         int readCdcData(unsigned char (*character)[CDC_FRAME_SIZE]);
         
+        /**
+        * @brief Prints char as hexadecimal value with a 0x prefix.
+        * @param value The char to be printed.
+        */
         void printHex(unsigned char value);
-        int fillBuffer();
 
+        /**
+        * @brief Fills the buffer with data from the serial port.
+        * @param saveToFile Indicates if image data should be saved to file.
+        * @return 0.
+        */
+        int fillBuffer(bool saveToFile = false);
+
+        /**
+        * @brief Gets the distance data from serial port and print it to std out.
+        * @return 0 if successful, 1 if error occurred.
+        */
         int getDistance();
 
-        void bufferToDisplay();
+        /**
+        * @brief Sends the buffer to the Displayer for rendering.
+        * @param printRaw Bool that indicates weather received byte data should be printed to std::out (for debug).
+        */
+        void bufferToDisplay(bool printRaw = false);
+
+        /**
+        * @brief Initializes textures in Displayer to default values.
+        */
         void initTextures();
 
+        /**
+        * @brief Finds a sequence of two characters in the given string.
+        * @param[in] str Pointer to the input string.
+        * @param ch1 First character of the sequence to find.
+        * @param ch2 Second character of the sequence to find.
+        * @return Index of the first occurrence of the sequence, or -1 if not found.
+        */
         int findSequence(unsigned char (*str)[CDC_FRAME_SIZE], unsigned char ch1, unsigned char ch2);
+        
+        /**
+        * @brief Find index of bytes signalizing start of image.
+        * @param[in] str Pointer to the input string.
+        * @return Index of the start of the data sequence, or -1 if not found.
+        */
         int findStart(unsigned char (*str)[CDC_FRAME_SIZE]);
+
+        /**
+        * @brief Find index of bytes signalizing end of image.
+        * @param[in] str Pointer to the input string.
+        * @return Index of the start of the data sequence, or -1 if not found.
+        */
         int findEnd(unsigned char (*str)[CDC_FRAME_SIZE]);
 
+        /**
+        * @brief Test function to simulate reading from serial port.
+        * @param[in] str Pointer to the string buffer.
+        * @return 0.
+        */
         int simulateRead(unsigned char (*character)[CDC_FRAME_SIZE]);
 };

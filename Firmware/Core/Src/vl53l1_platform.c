@@ -1,5 +1,15 @@
+/**
+******************************************************************************
+* @file           : vl53l1_platform.c
+* @brief          : Platform specific configuration of distance sencor communication.
+* @author         : Adam Prochazka <xproch0f>
+******************************************************************************
 
-/* 
+* @attention
+* File was partly taken from the VL53L1 Platform and configured for NucleoL432KC platform.
+* Configuration consisted mainly of implementing basic I2C communication functions, that were specific for this project.  
+* Original file contains this disclaimer:
+*
 * This file is part of VL53L1 Platform 
 * 
 * Copyright (c) 2016, STMicroelectronics - All Rights Reserved 
@@ -36,7 +46,6 @@
 
 #include "vl53l1_platform.h"
 #include "vl53l1_platform_log.h"
-//#include "vl53l1_api.h"
 #include "vl53l1_platform_user_config.h"
 #include "stm32xxx_hal.h"
 #include "main.h"
@@ -44,7 +53,6 @@
 #include <time.h>
 #include <math.h>
 #include "vl53l1_error_codes.h"
-//#include "X-NUCLEO-53L1A1.h"
 
 
 #define I2C_TIME_OUT_BASE   10
@@ -78,25 +86,16 @@ uint8_t _I2CBuffer[256];
 
 int _I2CWrite(uint16_t Dev, uint8_t *pdata, uint32_t count) {
     int status;
-    //int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
 
     status = HAL_I2C_Master_Transmit(&hi2c1, Dev, pdata, count, HAL_MAX_DELAY);
-    if (status) {
-        //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
-        //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
-    }
     return status;
 }
 
 int _I2CRead(uint16_t Dev, uint8_t *pdata, uint32_t count) {
     int status;
-    //int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
 
     status = HAL_I2C_Master_Receive(&hi2c1, Dev|1, pdata, count, HAL_MAX_DELAY);
-    if (status) {
-        //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
-        //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
-    }
+
     return status;
 }
 

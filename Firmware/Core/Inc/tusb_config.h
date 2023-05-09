@@ -1,4 +1,15 @@
-/*
+/**
+ ******************************************************************************
+ * @file           : tusb_config.h
+ * @brief          : Configuration file for USB communication.
+ * @author         : Adam Prochazka <xproch0f>
+ ******************************************************************************
+ 
+ * @attention
+ *
+ * File was from the large part taken from the TinyUSB repository and just slightly configured for projects usecase. 
+ * Original file contains this disclaimer:
+ * 
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)

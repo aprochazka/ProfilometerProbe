@@ -1,3 +1,11 @@
+/**
+ * @file main.hpp
+ * @brief Header file for the main application.
+ * @author Adam Prochazka <xproch0f>
+ *
+ * This file contains the includes, definitions, and declarations required for the main application.
+ */
+
 #include <iostream>
 #include <cstring>
 #include <cstdint>

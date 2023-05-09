@@ -1,3 +1,12 @@
+/**
+ ******************************************************************************
+ * @file           : Cam.c
+ * @brief          : Interacting with camera module
+ *                   This file contains the methods for communication with camera module, including I2C and SPI communication, sending commands to camera and reading data from it.
+ * @author         : Adam Prochazka <xproch0f>
+ ******************************************************************************
+ */
+
 #include "Cam.h"
 
 void CS_Off()
@@ -120,19 +129,24 @@ void Cam_I2C_write_bulk(I2C_HandleTypeDef *hi2c, const struct sensor_reg regList
 
 void Cam_Init(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi)
 {
+    // Test SPI communication
     Cam_SPI_write(hspi, 0x07, 0x80);
     HAL_Delay(100);
     Cam_SPI_write(hspi, 0x07, 0x00);
     HAL_Delay(100);
 
+    // Reset camera chip
     Cam_I2C_write(hi2c, (uint16_t)0x3008, 0x80);
+    
+    // Delay for reset complete.
     HAL_Delay(5);
+
+    // Set registers for desired configuration - need to be in this specific order
     Cam_I2C_write_bulk(hi2c, OV5642_QVGA_Preview);
-    HAL_Delay(200);
+    HAL_Delay(200); // Delay for first configuration to take effect
     Cam_I2C_write_bulk(hi2c, OV5642_JPEG_Capture_QSXGA);
     Cam_I2C_write_bulk(hi2c, ov5642_1024x768);
 
-    //Cam_I2C_write_bulk(hi2c, ov5642_320x240);
     HAL_Delay(100);
     
     Cam_I2C_write(hi2c, (uint16_t)0x3818, 0xa8); // TIMING CONTROL - ENABLE COMPRESSION, THUMBNAIL MODE DISABLE, VERTICAL FLIP, MIRROR
@@ -141,120 +155,23 @@ void Cam_Init(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi)
     Cam_I2C_write(hi2c, (uint16_t)0x4407, 0x09); // COMPRESSION CONTROL
 
     HAL_Delay(5);
-    // Setup camera, H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
+    
+    // H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
     Cam_SPI_write(hspi, 0x03, 0x02);
 
     HAL_Delay(5);
-    Cam_I2C_write_bulk(hi2c, ov5642_1024x768);
-    //Cam_I2C_write_bulk(hi2c, ov5642_320x240);
 
-    HAL_Delay(1000);
+    Cam_I2C_write_bulk(hi2c, ov5642_1024x768); // Necessary to be called again
+
+    HAL_Delay(1000); // Delay for camera to stabilize
     
-    Cam_SPI_write(hspi, 0x04, 0x01);
+    Cam_SPI_write(hspi, 0x04, 0x01); // Reset camera capture status and memory flags
     
     HAL_Delay(5);
     
     Cam_SPI_write(hspi, 0x01, 0x00); // Capture Control Register - Set to capture n+1 frames
     
     HAL_Delay(5);
-}
-
-void Cam_Refresh(I2C_HandleTypeDef *hi2c, SPI_HandleTypeDef *hspi){
-    /*Cam_I2C_write(hi2c, (uint16_t)0x3008, 0x80);
-
-    Cam_I2C_write_bulk(hi2c, OV5642_QVGA_Preview);
-
-    Cam_I2C_write_bulk(hi2c, OV5642_JPEG_Capture_QSXGA);
-
-    Cam_I2C_write(hi2c, (uint16_t)0x3818, 0xa8); // TIMING CONTROL - ENABLE COMPRESSION, THUMBNAIL MODE DISABLE, VERTICAL FLIP, MIRROR
-    Cam_I2C_write(hi2c, (uint16_t)0x3621, 0x10); // REGISTER FOR CORRECT MIRROR FUNCTION
-    Cam_I2C_write(hi2c, (uint16_t)0x3801, 0xb0); // TIMING HORIZONTAL START - ALSO FOR MIRROR
-    Cam_I2C_write(hi2c, (uint16_t)0x4407, 0x04); // COMPRESSION CONTROL
-
-    Cam_I2C_write_bulk(hi2c, ov5642_1280x960);
-
-    // Setup camera, H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
-    Cam_SPI_write(hspi, 0x03, 0x02);
-    Cam_SPI_write(hspi, 0x01, 0x00); // Capture Control Register - Set to capture n+1 frames
-
-    HAL_Delay(5);*/
-
-    // SAFE TO REMOVE
-    //Cam_I2C_write(hi2c, (uint16_t)0x3008, 0x80);
- 
-    Cam_I2C_write_bulk(hi2c, OV5642_QVGA_Preview);
-
-    Cam_I2C_write_bulk(hi2c, OV5642_JPEG_Capture_QSXGA);
-
-    Cam_I2C_write(hi2c, (uint16_t)0x3818, 0xa8); // TIMING CONTROL - ENABLE COMPRESSION, THUMBNAIL MODE DISABLE, VERTICAL FLIP, MIRROR
-    Cam_I2C_write(hi2c, (uint16_t)0x3621, 0x10); // REGISTER FOR CORRECT MIRROR FUNCTION
-    Cam_I2C_write(hi2c, (uint16_t)0x3801, 0xb0); // TIMING HORIZONTAL START - ALSO FOR MIRROR
-    Cam_I2C_write(hi2c, (uint16_t)0x4407, 0x04); // COMPRESSION CONTROL
-    Cam_I2C_write(hi2c, (uint16_t)0x5000, 0xFF);
-
-    Cam_I2C_write_bulk(hi2c, ov5642_1024x768);
-    // Setup camera, H-sync: High, V-sync:high, Sensor_delay: no Delay, FIFO_mode:FIFO enabled, power_mode:Low_power
-    Cam_SPI_write(hspi, 0x03, 0x02);
-
-    
-    // Brightness 4
-    Cam_I2C_write(hi2c, (uint16_t)0x5001, 0xff);
-    Cam_I2C_write(hi2c, (uint16_t)0x5589, 0x30);
-    Cam_I2C_write(hi2c, (uint16_t)0x5580, 0x04);
-    Cam_I2C_write(hi2c, (uint16_t)0x558a, 0x00);
-    //Cam_I2C_write(hi2c, (uint16_t)0x558a, 0x08);
-    
-    //Contrast 0
-    //Cam_I2C_write(hi2c, (uint16_t)0x5587, 0xff);
-    //Cam_I2C_write(hi2c, (uint16_t)0x5588, 0xff);
-    
-    /*
-    // Exposure _17
-    Cam_I2C_write(hi2c, (uint16_t)0x3a0f, 0x10);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a10, 0x08);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1b, 0x10);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1e, 0x08);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a11, 0x20);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1f, 0x10);
-    
-
-    
-    //Exposure 17 v2
-    Cam_I2C_write(hi2c, (uint16_t)0x3a0f, 0x60);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a10, 0x58);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a11, 0xa0);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1b, 0x60);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1e, 0x58);
-    Cam_I2C_write(hi2c, (uint16_t)0x3a1f, 0x20);
-    */
-
-    // Exposure Manual
-    Cam_I2C_write(hi2c, (uint16_t)0x3503, 0x3);
-    Cam_I2C_write(hi2c, (uint16_t)0x350C, 0xFF);
-    Cam_I2C_write(hi2c, (uint16_t)0x350D, 0xFF);
-
-    Cam_I2C_write(hi2c, (uint16_t)0x3500, 0x0);
-    Cam_I2C_write(hi2c, (uint16_t)0x3501, 0x00);
-    Cam_I2C_write(hi2c, (uint16_t)0x3502, 0x0f);
-    
-    //Gain MAX
-    Cam_I2C_write(hi2c, (uint16_t)0x350A, 0x0);
-    Cam_I2C_write(hi2c, (uint16_t)0x350B, 0x35);
-    Cam_I2C_write(hi2c, (uint16_t)0x3508, 0x0);
-    Cam_I2C_write(hi2c, (uint16_t)0x3509, 0x35);
-    
-    // AWB
-    Cam_I2C_write(hi2c, (uint16_t)0x3406, 0x1);
-    
-    Cam_I2C_write(hi2c, (uint16_t)0x3400, 0xf);
-    Cam_I2C_write(hi2c, (uint16_t)0x3401, 0xff);
-    Cam_I2C_write(hi2c, (uint16_t)0x3402, 0xf);
-    Cam_I2C_write(hi2c, (uint16_t)0x3403, 0x7f);
-    Cam_I2C_write(hi2c, (uint16_t)0x3404, 0xf);
-    Cam_I2C_write(hi2c, (uint16_t)0x3405, 0xff);    
-
-
-    HAL_Delay(50);
 }
 
 int Cam_FIFO_length(SPI_HandleTypeDef *hspi)
@@ -263,41 +180,26 @@ int Cam_FIFO_length(SPI_HandleTypeDef *hspi)
     len1 = Cam_SPI_read(hspi, 0x42);
     len2 = Cam_SPI_read(hspi, 0x43);
     len3 = Cam_SPI_read(hspi, 0x44)& 0x7f;
-    len = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
+    len = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff; // logic & operation needed, because content of the registry 0x44 isn't all length data.
     return len;
 }
 
 void Cam_Start_Capture(SPI_HandleTypeDef *hspi)
 {
-    /*
-    uint8_t FIFO_Reg = Cam_SPI_read(hspi, 0x04);
-    uint8_t FIFO_Reg_Clear_Flags = FIFO_Reg | 0x01;
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags); // Clear FIFO Write Done Flaf
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags);
-    HAL_Delay(1);
-
-    FIFO_Reg = Cam_SPI_read(hspi, 0x04);
-    FIFO_Reg_Clear_Flags = FIFO_Reg | 0x10;
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags); // Reset FIFO Write Pointer
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags);
-    HAL_Delay(1);
-
-    FIFO_Reg = Cam_SPI_read(hspi, 0x04);
-    FIFO_Reg_Clear_Flags = FIFO_Reg | 0x20;
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags); // Reset FIFO Read Pointer
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags);
-*/
-    Cam_SPI_write(hspi, 0x04, 0x01);
+    // Reset memory pointers and capture status flags
+    Cam_SPI_write(hspi, 0x04, 0x01); 
     HAL_Delay(3);
     Cam_SPI_write(hspi, 0x04, 0x01);
 
+    // Start capture
     HAL_Delay(3);
-    Cam_SPI_write(hspi, 0x04, 0x02); // Start capture
+    Cam_SPI_write(hspi, 0x04, 0x02); 
     HAL_Delay(3);
 }
 
 void Cam_Wait_Capture_Done(SPI_HandleTypeDef *hspi)
 {
+    // Check if bit meaning capture is done in registry 0x41 is set 
     while (1)
     {
         uint8_t regValue = Cam_SPI_read(hspi, 0x41);
@@ -309,34 +211,25 @@ void Cam_Wait_Capture_Done(SPI_HandleTypeDef *hspi)
 
 void Cam_Start_Burst_Read(SPI_HandleTypeDef *hspi)
 {
-
-    /*
-    uint8_t FIFO_Reg = Cam_SPI_read(hspi, 0x04);
-    uint8_t FIFO_Reg_Clear_Flags = FIFO_Reg | 0x20;
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags); // Reset FIFO Read Pointer
-    Cam_SPI_write(hspi, 0x04, FIFO_Reg_Clear_Flags);
-*/
-
+    // Reset memory pointers and capture status flags
     Cam_SPI_write(hspi, 0x04, 0x01);
     Cam_SPI_write(hspi, 0x04, 0x01);
 
     uint8_t BURST_FIFO_READ = 0x3c;
     uint8_t empty = 0x00;
 
+    // Set camera CS chip to high for SPI communication
     CS_On();
 
+    // Send command for burst read
     HAL_SPI_TransmitReceive(hspi, &BURST_FIFO_READ, &empty, 1, HAL_MAX_DELAY);
 }
 
 void Cam_Capture(SPI_HandleTypeDef *hspi)
 {
-    //LED_On();
-
     Cam_SPI_write(hspi, 0x01, 0x00); // Capture Control Register - Set to capture n+1 frames
 
     Cam_Start_Capture(hspi);
 
     Cam_Wait_Capture_Done(hspi);
-
-    //LED_Off();
 }

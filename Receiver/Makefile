@@ -7,6 +7,9 @@ OBJS = $(SRCS:.cpp=.o)
 
 all: main
 
+doc:
+	doxygen 
+
 main: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o main $(LDLIBS)
 
@@ -14,4 +17,4 @@ main: $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) main
+	rm -rf $(OBJS) main doc

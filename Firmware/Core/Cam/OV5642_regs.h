@@ -1,3 +1,13 @@
+/**
+ ******************************************************************************
+ * @file           : OV5642_regs.h
+ * @brief          : Predefined registers configurations for camera chip. 
+ *                   This file contains settings for registers to achieve specific camera chip configuration.
+ * 					 This file was taken over from ArduCam repository and edited to work for this specific project. 
+ * @author         : Adam Prochazka <xproch0f>
+ ******************************************************************************
+ */
+
 #include "stdint.h"
 #include "stdlib.h"
 #include "stdio.h"
