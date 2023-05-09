@@ -11,6 +11,11 @@
 - Models are designed to be printed with standard 2mm layer height
 - When slicing be sure to print outer walls first to make print more accurate
 
+### Assembly 
+
+- All screws are size M3
+- Assembly should be done accordingly  
+
 ### Components
 
 - Development board: Nucleo L432KC
