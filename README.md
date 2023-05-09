@@ -1,4 +1,6 @@
 # Profilometer Probe
+## Device was created as part of a bachelor's thesis at BUT VUT 2022/2023 named Probe for Determining the Surface Condition of Small Diameter Barrels 
+## Detailed description of device design and implementation is inside thesis  
 
 ![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Render.png?raw=true)
 ![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Assembled.jpg?raw=true)
@@ -16,6 +18,11 @@
 - All screws are size M3
 - Assembly should be done accordingly  
 
+### PCB
+
+- PCB should be two sided with 1.6mm width
+- Design files are created in KiCad
+
 ### Components
 
 - Development board: Nucleo L432KC
@@ -24,9 +31,6 @@
 - Complete list of components and connectors for probe can be found inside HW/Parts.md
 
 ## Firmware for profilometer probe
-
-#### Probe design block Scheme
-![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/deviceScheme.png?raw=true)
 
 ### Build
 
