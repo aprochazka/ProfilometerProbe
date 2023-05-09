@@ -1,7 +1,7 @@
 # Profilometer Probe
 
 ![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Render.png?raw=true)
-![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Assembled.png?raw=true)
+![alt text](https://github.com/aprochazka/ProfilometerProbe/blob/main/Probe_Assembled.jpg?raw=true)
 
 ## Hardware
 
