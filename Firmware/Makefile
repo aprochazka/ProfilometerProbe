@@ -70,7 +70,7 @@ flash-jlink: build | $(BUILD_DIR)/jlink-script
 	JLinkExe -commanderScript $(BUILD_DIR)/jlink-script
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) doc
 
 ################################## Container ##################################
 
@@ -135,5 +135,7 @@ clean-image:
 
 clean-all: clean clean-image
 
+doc: 
+	doxygen
 flash:
 	openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "program build/Probe.bin verify reset exit 0x08000000"
